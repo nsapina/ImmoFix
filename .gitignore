@@ -1,0 +1,14 @@
+.env
+.env.aws
+*.log
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+.vite/
+.idea/
+.vscode/
+.DS_Store
