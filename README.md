@@ -211,11 +211,9 @@ Ausführliche Beispiele: [docs/api-uebersicht.md](docs/api-uebersicht.md)
 
 Vor der Abgabe ergänzen:
 
-| Teammitglied | Rolle / Verantwortungsbereich |
-|---|---|
-| `[Name]` | `[z. B. Backend, Authentifizierung]` |
-| `[Name]` | `[z. B. Frontend, UX]` |
-| `[Name]` | `[z. B. Docker, Dokumentation, Tests]` |
+| Teammitglied  | Rolle / Verantwortungsbereich |
+| ------------- | ----------------------------- |
+| Nikola Sapina | Fullstack-Entwicklung, Datenbanken, Authentifizierung, Docker, Dokumentation und Tests |
 
 ## Git-Workflow
 
