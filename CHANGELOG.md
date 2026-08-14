@@ -18,6 +18,18 @@
 
 - Tagesdokumentation für Tag 5 ergänzt
 - Sprint-1-Review dokumentiert
-- Sprint-2-Plan auf AWS, Stabilisierung und Präsentation ausgerichtet
-- README auf den Projektstand vom 07.08.2026 aktualisiert
+- Sprint-2-Plan auf Stabilisierung und AWS ausgerichtet
 - Repository für den ersten vollständigen Commit vorbereitet
+
+## 2.1.0 – AWS-EC2-Deployment und Abgabestand
+
+- Tagesdokumentation für Tag 6 bis Tag 9 ergänzt
+- Sprint-2-Review dokumentiert
+- AWS-EC2-Deployment erfolgreich durchgeführt
+- Docker Engine und Docker Compose auf EC2 eingesetzt
+- Frontend auf HTTP-Port 80 bereitgestellt
+- PostgreSQL, MongoDB, FastAPI und Frontend als Docker-Services auf EC2 betrieben
+- `.env.aws.example` an den tatsächlich verwendeten EC2-Stand angepasst
+- AWS-Dokumentation auf EC2 ohne RDS korrigiert
+- README auf den Abgabestand vom 14.08.2026 aktualisiert
+- nicht umgesetzte Punkte wie RDS, HTTPS und fertige Präsentationsdatei transparent dokumentiert

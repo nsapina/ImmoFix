@@ -14,9 +14,10 @@ ImmoFix ist eine Fullstack-Webanwendung zur zentralen Verwaltung von Reparatur- 
 - Ticketfilter, Statusänderung, Priorität und Handwerkerzuweisung
 - Verwaltung von Immobilien, Wohnungen und Handwerkern
 - Aktivitätsverlauf und interne Notizen
-- PostgreSQL für Geschäftsdaten
+- PostgreSQL für strukturierte Geschäftsdaten
 - MongoDB für Ticket-Ereignisse
-- Docker Compose für das lokale Setup
+- Docker Compose für lokale Entwicklung und AWS-Deployment
+- Deployment auf einer AWS-EC2-Instanz
 
 ## Technologien
 
@@ -29,9 +30,11 @@ ImmoFix ist eine Fullstack-Webanwendung zur zentralen Verwaltung von Reparatur- 
 | Migrationen | Alembic |
 | Authentifizierung | Argon2-Passwort-Hashing, JWT Bearer Token |
 | Infrastruktur | Docker, Docker Compose, nginx |
-| Optionales Deployment | AWS EC2 und AWS RDS |
+| Deployment | AWS EC2 mit Docker Compose |
 
 ## Architektur
+
+### Lokal
 
 ```text
 Browser
@@ -47,6 +50,26 @@ nginx / React
 ```
 
 Die öffentliche Meldeseite verwendet ausschließlich `/api/public/*`. Alle Verwaltungsendpunkte benötigen einen gültigen Bearer Token.
+
+### AWS-Abgabestand
+
+```text
+Internet
+   |
+   | HTTP 80
+   v
+AWS EC2
+   |
+   +-- nginx / React
+   |
+   +-- FastAPI
+   |
+   +-- PostgreSQL-Container
+   |
+   +-- MongoDB-Container
+```
+
+Für die Projektabgabe laufen Frontend, Backend, PostgreSQL und MongoDB gemeinsam als Docker-Services auf einer EC2-Instanz. AWS RDS wurde nicht umgesetzt.
 
 ## Projektstruktur
 
@@ -72,7 +95,10 @@ ImmoFix/
 ├── docs/
 ├── scripts/
 ├── compose.yaml
+├── compose.dev.yaml
+├── compose.aws.yaml
 ├── .env.example
+├── .env.aws.example
 └── README.md
 ```
 
@@ -135,13 +161,51 @@ Passwort: ImmoFix2026!
 
 Vor einem öffentlichen Deployment müssen Passwort und `JWT_SECRET` geändert werden.
 
+## AWS-Deployment auf EC2
+
+Für die Abgabe wurde ImmoFix erfolgreich auf einer Ubuntu-EC2-Instanz bereitgestellt.
+
+### Environment-Datei
+
+```bash
+cp .env.aws.example .env.aws
+```
+
+Alle Platzhalter in `.env.aws` müssen vor dem Start ersetzt werden. Die Datei `.env.aws` wird über `.gitignore` ausgeschlossen und darf keine echten Zugangsdaten im Repository enthalten.
+
+### Deployment starten
+
+Die AWS-Konfiguration wird mit der Basis-Compose-Datei kombiniert:
+
+```bash
+docker compose \
+  --env-file .env.aws \
+  -f compose.yaml \
+  -f compose.aws.yaml \
+  up -d --build
+```
+
+Status prüfen:
+
+```bash
+docker compose \
+  --env-file .env.aws \
+  -f compose.yaml \
+  -f compose.aws.yaml \
+  ps
+```
+
+Beim getesteten Deployment liefen die Services `postgres`, `mongo`, `api` und `frontend`; die Datenbank- und API-Healthchecks waren erfolgreich. Das Frontend wird über Port `80` der EC2-Instanz ausgeliefert.
+
+Ausführliche Beschreibung: [docs/aws-deployment.md](docs/aws-deployment.md)
+
 ## Wichtige Docker-Befehle
 
 ```bash
-# Status
+# Status lokal
 docker compose ps
 
-# Logs
+# Logs lokal
 docker compose logs -f
 
 # Tests
@@ -194,9 +258,9 @@ Ausführliche Beispiele: [docs/api-uebersicht.md](docs/api-uebersicht.md)
 - [Architektur](docs/architektur.md)
 - [API-Übersicht](docs/api-uebersicht.md)
 - [Installation und Testablauf](docs/installation.md)
-- [Sprintplanung](docs/sprints.md)
+- [Sprintplanung und Reviews](docs/sprints.md)
 - [Präsentationsleitfaden](docs/praesentation.md)
-- [AWS-Deployment](docs/aws-deployment.md)
+- [AWS-EC2-Deployment](docs/aws-deployment.md)
 
 ### Tagesdokumentation
 
@@ -205,48 +269,46 @@ Ausführliche Beispiele: [docs/api-uebersicht.md](docs/api-uebersicht.md)
 - [Tag 3 – Fullstack-Grundsystem](docs/tagesdokumentation/tag-03.md)
 - [Tag 4 – Login und Projektdokumentation](docs/tagesdokumentation/tag-04.md)
 - [Tag 5 – Lokaler MVP, Sprint-1-Review und Git-Vorbereitung](docs/tagesdokumentation/tag-05.md)
-- [Vorlage für weitere Tage](docs/tagesdokumentation/vorlage.md)
+- [Tag 6 – Sprint-2-Planung und Projektprüfung](docs/tagesdokumentation/tag-06.md)
+- [Tag 7 – Stabilisierung und Deployment-Vorbereitung](docs/tagesdokumentation/tag-07.md)
+- [Tag 8 – AWS-Konfiguration und Abgabevorbereitung](docs/tagesdokumentation/tag-08.md)
+- [Tag 9 – AWS-EC2-Deployment und Sprint-2-Review](docs/tagesdokumentation/tag-09.md)
 
 ## Team und Rollen
 
-Vor der Abgabe ergänzen:
+Das Projekt wurde als Einzelprojekt umgesetzt. Daher wurden alle technischen und organisatorischen Aufgaben von einer Person übernommen.
 
-| Teammitglied  | Rolle / Verantwortungsbereich |
-| ------------- | ----------------------------- |
-| Nikola Sapina | Fullstack-Entwicklung, Datenbanken, Authentifizierung, Docker, Dokumentation und Tests |
+| Teammitglied | Rolle / Verantwortungsbereich |
+|---|---|
+| Nikola Sapina | Fullstack-Entwicklung, Datenbanken, Authentifizierung, Docker, AWS-Deployment, Dokumentation und Tests |
 
 ## Git-Workflow
 
-### Erster vollständiger Repository-Upload
+Vor jedem Commit wird geprüft, dass keine lokalen Secrets oder Schlüssel übertragen werden:
 
 ```bash
-git init
-git branch -M main
 git status
 git check-ignore .env
-git add .
+git check-ignore .env.aws
 git status --short
-git commit -m "feat: complete local ImmoFix fullstack MVP"
-gh repo create ImmoFix --private --source=. --remote=origin --push
 ```
 
-Vor dem Commit muss geprüft werden, dass `.env`, Passwörter, Tokens und AWS-Zugangsdaten nicht in der Staging Area erscheinen.
+Nicht in das Repository gehören insbesondere `.env`, `.env.aws`, private Schlüssel, Tokens oder AWS-Zugangsdaten.
 
-### Weitere Änderungen
+Änderungen werden anschließend committed und gepusht:
 
 ```bash
-git status
 git add .
-git commit -m "docs: update daily project documentation"
+git commit -m "docs: finalize project documentation and AWS EC2 deployment"
 git push
 ```
 
-Commit-Nachrichten sollen konkrete Änderungen beschreiben.
-
 ## Projektstatus
 
-**Stand: 07.08.2026**
+**Stand: 14.08.2026**
 
-Der lokale MVP enthält alle Pflichtbereiche: React, FastAPI, Fetch API, React Router, PostgreSQL, MongoDB, Auth Basics, Docker Compose, Migrationen und deutsche Projektdokumentation. Der vollständige lokale Ablauf wurde getestet und das Projekt ist für den ersten vollständigen Repository-Commit vorbereitet.
+Der lokale Fullstack-MVP ist vollständig umgesetzt und getestet. Die Anwendung umfasst React, React Router, Fetch API, FastAPI, PostgreSQL, MongoDB, Auth Basics, Alembic, Docker Compose und deutsche Projektdokumentation.
 
-Ab dem 10.08.2026 liegt der Schwerpunkt auf dem optionalen AWS-Deployment, der Stabilisierung des Demo-Ablaufs und der Vorbereitung der Abschlusspräsentation.
+Zusätzlich wurde ImmoFix erfolgreich auf einer AWS-EC2-Instanz mit Docker Compose bereitgestellt. React/nginx, FastAPI, PostgreSQL und MongoDB laufen als Docker-Services auf der EC2-Instanz. Das Frontend ist über HTTP-Port `80` erreichbar.
+
+AWS RDS wurde im Rahmen der Projektabgabe nicht umgesetzt. Eine fertige Präsentationsdatei ist nicht Bestandteil dieses Repository-Stands; `docs/praesentation.md` enthält lediglich einen Leitfaden für eine mögliche Vorstellung des Projekts.

@@ -1,4 +1,4 @@
-# Sprintplanung
+# Sprintplanung und Reviews
 
 ## Sprint 1 – Funktionsfähiger lokaler Fullstack-MVP
 
@@ -33,35 +33,82 @@ Der lokale MVP ist funktionsfähig. Der vollständige Ablauf von der öffentlich
 ### Konsequenzen für Sprint 2
 
 - nur noch eine zentrale Repository-Version verwenden
-- Änderungen regelmäßig committen und dokumentieren
+- Änderungen nachvollziehbar über Git verwalten
 - lokale Stabilität vor dem AWS-Deployment prüfen
-- Live-Demo als festen End-to-End-Ablauf vorbereiten
+- Deployment-Schritte dokumentieren
 
-## Sprint 2 – Deployment, Stabilisierung und Präsentation
+## Sprint 2 – Stabilisierung und AWS-Deployment
 
 **Zeitraum:** 10.08.2026–13.08.2026  
-**Sprintziel:** Das Projekt wird stabilisiert, optional auf AWS bereitgestellt und für die Abschlusspräsentation vorbereitet.
+**Sprintziel:** Den lokalen MVP stabilisieren, die Deployment-Konfiguration vorbereiten und die Anwendung auf AWS EC2 bereitstellen.
 
-### Geplante Aufgaben
+### Umgesetzte Inhalte
 
-- AWS-Architektur und Sicherheitskonzept finalisieren
-- EC2-Instanz vorbereiten
-- PostgreSQL optional über AWS RDS bereitstellen
-- Docker-Compose-Deployment auf EC2 testen
-- Umgebungsvariablen und Secrets sicher konfigurieren
-- Security Groups und Netzwerkzugriff dokumentieren
-- responsive Darstellung und Fehlermeldungen prüfen
-- Demo-Daten und Live-Demo-Ablauf stabilisieren
-- README und Tagesdokumentation fortführen
-- Präsentation und Generalprobe vorbereiten
-- Sprint-2-Review und Lessons Learned dokumentieren
+- bestehende Fullstack-Funktionen erneut geprüft
+- Docker- und Environment-Konfiguration für AWS vorbereitet
+- separate `.env.aws` für Server-Secrets verwendet
+- AWS-EC2-Instanz eingerichtet
+- Git, Docker Engine und Docker Compose Plugin auf EC2 eingerichtet
+- Repository auf EC2 geklont
+- AWS-Konfiguration mit `compose.yaml` und `compose.aws.yaml` validiert
+- React/nginx auf Port 80 bereitgestellt
+- FastAPI, PostgreSQL und MongoDB als Docker-Services gestartet
+- Docker-Healthchecks geprüft
+- End-to-End-Ablauf auf der EC2-Instanz getestet
+- AWS-Deployment dokumentiert
+
+### Nicht umgesetzt
+
+- AWS RDS
+- Domain und HTTPS
+- fertige Präsentationsdatei
+
+Die Präsentation war bis zum Repository-Abgabestand noch nicht ausgearbeitet. Im Repository befindet sich lediglich ein Präsentationsleitfaden.
+
+## Sprint-2-Review – 13.08.2026
+
+### Ergebnis
+
+Das wichtigste Sprintziel wurde erreicht: ImmoFix läuft zusätzlich zur lokalen Umgebung auf einer AWS-EC2-Instanz.
+
+Die finale AWS-Architektur der Abgabe besteht aus vier Docker-Services auf einer EC2-Instanz:
+
+- frontend / nginx
+- FastAPI
+- PostgreSQL
+- MongoDB
+
+Das Frontend ist über HTTP-Port 80 erreichbar. PostgreSQL und MongoDB werden nicht direkt über die AWS Security Group veröffentlicht.
+
+### Gut gelaufen
+
+- der lokale Docker-Stack ließ sich auf die EC2-Umgebung übertragen
+- Healthchecks halfen bei der Kontrolle der Service-Abhängigkeiten
+- GitHub wurde als zentrale Projektquelle verwendet
+- Frontend und API konnten ohne Änderung des React-Fetch-Konzepts über nginx betrieben werden
+
+### Herausforderungen
+
+- `.env.aws` musste getrennt von der lokalen `.env` behandelt werden
+- die Funktionsweise des Compose-Merges zwischen `compose.yaml` und `compose.aws.yaml` musste nachvollzogen werden
+- beim Bearbeiten der YAML-Datei entstand kurzzeitig ein doppelter `services:`-Block
+- unterschiedliche lokale Projektstände hatten zuvor zu Verwechslungen geführt
+
+### Lessons Learned
+
+- Deployment-Konfigurationen sollten vor dem Start mit `docker compose ... config` validiert werden
+- Secrets gehören nicht in Git
+- ein funktionierender lokaler Docker-Stack vereinfacht ein EC2-Deployment deutlich
+- zunächst einen einfachen, funktionierenden Cloud-Stand herstellen und zusätzliche Dienste wie RDS erst danach integrieren
+- dokumentiert werden sollte nur, was tatsächlich umgesetzt und getestet wurde
 
 ## Definition of Done
 
-Eine Funktion gilt als fertig, wenn:
+Eine Funktion beziehungsweise ein Deployment-Schritt gilt als fertig, wenn:
 
-- sie lokal über Docker Compose läuft,
+- er reproduzierbar ausgeführt werden kann,
 - Frontend und Backend miteinander kommunizieren,
-- Fehler verständlich angezeigt werden,
+- erforderliche Datenbanken erreichbar sind,
+- Fehler über Logs oder Healthchecks nachvollziehbar sind,
 - keine Zugangsdaten im Repository liegen,
-- die Änderung getestet, dokumentiert und committed wurde.
+- die Änderung getestet und dokumentiert wurde.
